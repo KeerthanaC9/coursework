@@ -19,19 +19,19 @@ def perform_fls_case1(age_val, headache_val, temp_val):
 
 
 
-    temp_low    = T1MF_Triangular("LowTemp", 30, 34, 36)
-    temp_normal = T1MF_Triangular("NormalTemp", 36, 37, 38)
-    temp_high   = T1MF_Triangular("HighTemp", 37, 40, 45)
+    temp_low    = T1MF_Triangular("LowTemp", 30, 35.5, 36.3)
+    temp_normal = T1MF_Triangular("NormalTemp", 35.8, 37, 38.3)
+    temp_high   = T1MF_Triangular("HighTemp", 37.8, 39.5, 45)
 
    
-    headache_mild     = T1MF_Triangular("MildHeadache", 0, 1.5, 3)
+    headache_mild     = T1MF_Triangular("MildHeadache", 0, 1.5, 4)
     headache_moderate = T1MF_Triangular("ModerateHeadache", 3, 5, 7)
     headache_severe   = T1MF_Triangular("SevereHeadache", 7, 9, 10)
 
 
-    age_young   = T1MF_Triangular("Young", 0, 10, 20)
-    age_adult   = T1MF_Triangular("Adult", 20, 40, 60)
-    age_elderly = T1MF_Triangular("Elderly", 60, 85, 130)
+    age_young   = T1MF_Triangular("Young", 0, 12, 25)
+    age_adult   = T1MF_Triangular("Adult", 20, 40, 65)
+    age_elderly = T1MF_Triangular("Elderly", 55, 80, 130)
 
   
     urgency_standard  = T1MF_Trapezoidal("Standard", [0, 0, 30, 50])
@@ -166,3 +166,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
