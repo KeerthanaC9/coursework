@@ -57,21 +57,54 @@ def perform_fls_case1(age_interval, headache_interval, temp_interval):
 
   
     rulebase = T1_Rulebase()
+# ==============================================================================
+    # 1. ABSOLUTE EMERGENCY OVERRIDES (TempLow and TempHigh)
+    #    These rules cover critical physiological extremes (Hypothermia or High Fever/Hyperpyrexia)
+    #    and result in Emergency (urgency_emg_c) regardless of minor symptom variations,
+    #    as per the precautionary principle in triage. 
+    # ==============================================================================
 
-   
-    for temp_a in [temp_low_a, temp_high_a]:
-        for headache_a in [headache_mild_a, headache_moderate_a, headache_severe_a]:
-            for age_a in [age_young_a, age_adult_a, age_elderly_a]:
-                rulebase.addRule(T1_Rule([temp_a, headache_a, age_a], urgency_emg_c))
+    # 1.1. IF Temp IS Low THEN Urgency IS Emergency (9 Rules)
+    rulebase.addRule(T1_Rule([temp_low_a, headache_mild_a, age_young_a], urgency_emg_c))
+    rulebase.addRule(T1_Rule([temp_low_a, headache_mild_a, age_adult_a], urgency_emg_c))
+    rulebase.addRule(T1_Rule([temp_low_a, headache_mild_a, age_elderly_a], urgency_emg_c))
+    rulebase.addRule(T1_Rule([temp_low_a, headache_moderate_a, age_young_a], urgency_emg_c))
+    rulebase.addRule(T1_Rule([temp_low_a, headache_moderate_a, age_adult_a], urgency_emg_c))
+    rulebase.addRule(T1_Rule([temp_low_a, headache_moderate_a, age_elderly_a], urgency_emg_c))
+    rulebase.addRule(T1_Rule([temp_low_a, headache_severe_a, age_young_a], urgency_emg_c))
+    rulebase.addRule(T1_Rule([temp_low_a, headache_severe_a, age_adult_a], urgency_emg_c))
+    rulebase.addRule(T1_Rule([temp_low_a, headache_severe_a, age_elderly_a], urgency_emg_c))
 
-    
-    for age_a in [age_young_a, age_adult_a, age_elderly_a]:
-        rulebase.addRule(T1_Rule([temp_normal_a, headache_mild_a, age_a], urgency_std_c))
+    # 1.2. IF Temp IS High THEN Urgency IS Emergency (9 Rules)
+    rulebase.addRule(T1_Rule([temp_high_a, headache_mild_a, age_young_a], urgency_emg_c))
+    rulebase.addRule(T1_Rule([temp_high_a, headache_mild_a, age_adult_a], urgency_emg_c))
+    rulebase.addRule(T1_Rule([temp_high_a, headache_mild_a, age_elderly_a], urgency_emg_c))
+    rulebase.addRule(T1_Rule([temp_high_a, headache_moderate_a, age_young_a], urgency_emg_c))
+    rulebase.addRule(T1_Rule([temp_high_a, headache_moderate_a, age_adult_a], urgency_emg_c))
+    rulebase.addRule(T1_Rule([temp_high_a, headache_moderate_a, age_elderly_a], urgency_emg_c))
+    rulebase.addRule(T1_Rule([temp_high_a, headache_severe_a, age_young_a], urgency_emg_c))
+    rulebase.addRule(T1_Rule([temp_high_a, headache_severe_a, age_adult_a], urgency_emg_c))
+    rulebase.addRule(T1_Rule([temp_high_a, headache_severe_a, age_elderly_a], urgency_emg_c))
+
+    # ==============================================================================
+    # 2. NORMAL TEMPERATURE RULES (TempNormal)
+    # ==============================================================================
+
+    # 2.1. IF Temp IS Normal AND Headache IS Mild
+    rulebase.addRule(T1_Rule([temp_normal_a, headache_mild_a, age_young_a], urgency_std_c))
+    rulebase.addRule(T1_Rule([temp_normal_a, headache_mild_a, age_adult_a], urgency_std_c))
+    rulebase.addRule(T1_Rule([temp_normal_a, headache_mild_a, age_elderly_a], urgency_std_c))
+
+    # 2.2. IF Temp IS Normal AND Headache IS Moderate
     rulebase.addRule(T1_Rule([temp_normal_a, headache_moderate_a, age_young_a], urgency_urg_c))
     rulebase.addRule(T1_Rule([temp_normal_a, headache_moderate_a, age_adult_a], urgency_std_c))
     rulebase.addRule(T1_Rule([temp_normal_a, headache_moderate_a, age_elderly_a], urgency_urg_c))
-    for age_a in [age_young_a, age_adult_a, age_elderly_a]:
-        rulebase.addRule(T1_Rule([temp_normal_a, headache_severe_a, age_a], urgency_urg_c))
+
+    # 2.3. IF Temp IS Normal AND Headache IS Severe
+    rulebase.addRule(T1_Rule([temp_normal_a, headache_severe_a, age_young_a], urgency_urg_c))
+    rulebase.addRule(T1_Rule([temp_normal_a, headache_severe_a, age_adult_a], urgency_urg_c))
+    rulebase.addRule(T1_Rule([temp_normal_a, headache_severe_a, age_elderly_a], urgency_urg_c))
+
 
     patient_urgency_output.setDiscretisationLevel(100)
 
@@ -87,9 +120,9 @@ def perform_fls_case1(age_interval, headache_interval, temp_interval):
     patient_temperature_input.setInput(temp_high_val)
     output_high = rulebase.evaluate(1)[patient_urgency_output]
 
-    print(f"\nDefuzzified Patient Urgency Interval: [{output_low:.2f}, {output_high:.2f}]")
+    urgency_value = (output_low + output_high) / 2
 
-    
+    print(f"\nDefuzzified Patient Urgency Interval: [{output_low:.2f}, {output_high:.2f}]")
   
     fig, axes = plt.subplots(3, 1, figsize=(10, 10))
 
@@ -113,21 +146,40 @@ def perform_fls_case1(age_interval, headache_interval, temp_interval):
     axes[2].axvspan(temp_low_val, temp_high_val, color='red', alpha=0.2, label='Input Interval')
     axes[2].set_title("Temperature Membership Functions")
     axes[2].legend()
-
-    plt.tight_layout()
-    plt.show()
-
    
     fig, ax = plt.subplots(figsize=(10, 5))
-    x_urg = np.linspace(0, 100, 400)
+    x_urg = np.linspace(0, 100, 400)#
+
     for mf in [urgency_standard, urgency_urgent, urgency_emergency]:
         ax.plot(x_urg, [mf.getFS(x) for x in x_urg], label=mf.getName(), linewidth=2)
     ax.axvspan(output_low, output_high, color='red', alpha=0.2, label='Defuzzified Interval')
+
+    x_vals = np.linspace(0,100,500)
+    aggregated = np.zeros_like(x_vals)
+
+    for rule in rulebase.getRules():
+        for cons in rule.getConsequents():
+            mf = cons.getMF()
+            alpha = rule.getFStrength(1)
+
+            clipped = np.array([min(mf.getFS(x), alpha) for x in x_vals])
+            aggregated = np.maximum(aggregated, clipped)
+
+    ax.fill_between(x_vals, 0, aggregated, color="blue", alpha=0.3, label="Aggregated Fuzzy Set", linewidth=2)
+    ax.plot(x_vals, aggregated, color="red", linewidth=2.5, linestyle='--', label="Aggregated MF Boundary")
+
+    ax.plot([urgency_value], [0], marker='o', markersize=10, color='purple',
+            label=f"Defuzzified = {urgency_value:.2f}", zorder=5)
+    
+    ax.axvline(urgency_value, color='purple', linestyle='--', alpha=0.7)
+    ax.axhline(0, color='black', linewidth=0.8)
+
     ax.set_title("Patient Urgency Membership Functions")
     ax.set_xlabel("Urgency Score")
     ax.set_ylabel("Membership Degree")
     ax.legend()
     ax.grid(True, alpha=0.3)
+    plt.tight_layout()
     plt.show()
 
     return output_low, output_high

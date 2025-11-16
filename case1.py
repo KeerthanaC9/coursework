@@ -136,7 +136,8 @@ def perform_fls_case1(age_val, headache_val, temp_val):
 
     
     axes[2].set_title("Temperature Membership Degrees")
-    x_vals = np.linspace(30,45,400)
+    x_vals = np.linspace(30,45,400)#
+    
     for mf in [temp_low, temp_normal, temp_high]:
         axes[2].plot(x_vals, [mf.getFS(x) for x in x_vals], label=mf.getName())
     axes[2].axvline(temp_val, color='red', linestyle='--')
